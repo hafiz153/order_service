@@ -59,6 +59,6 @@ export class AuthController {
       );
     }
 
-    return await this.authService.refreshAccessToken(refreshToken);
+    return await this.authService.refreshAccessToken(body);
   }
 }

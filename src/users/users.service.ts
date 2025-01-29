@@ -44,7 +44,7 @@ export class UsersService {
     return await this.userModel.findOne({ email }).exec();
   }
   async update(id: string, updateUserDto: UpdateUserDto) {
-    return await this.userModel.findByIdAndUpdate({ id, updateUserDto });
+    return await this.userModel.findByIdAndUpdate(id, updateUserDto );
   }
   async addRoles(
     id: string,

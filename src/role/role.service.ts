@@ -77,9 +77,7 @@ export class RoleService {
 
   async initializeRoles(): Promise<void> {
     const authData = rolePermissions;
-    console.log({ authData });
     for (const { name, permissions } of authData) {
-      console.log({ name, permissions });
       await this.createOrUpdateRole(name, permissions);
     }
   }

@@ -10,7 +10,7 @@ import * as bcrypt from 'bcrypt';
 import mongoose, { Model } from 'mongoose';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { AuthPayload, LoginUserDto } from './dto/login-user.dto';
+import { AuthPayload, LoginUserDto, RefreshTokenDto } from './dto/login-user.dto';
 import config from 'src/config';
 
 @Injectable()
@@ -70,60 +70,61 @@ export class AuthService {
     const payload: AuthPayload = {
       name: user.name,
       email: user.email,
-      sub: user._id,
-      permissions,
+      sub: user._id
     };
     const access_token = this.generateAccessToken(payload);
-    const refresh_token = this.generateRefreshToken(payload);
+    const refresh_token = this.generateRefreshToken(user._id as string);
     // Hash and store the refresh token in the database
     const hashedRefreshToken = await bcrypt.hash(refresh_token, 10);
-    user.refreshToken = hashedRefreshToken;
-    await user.save();
 
-    return { ...payload, access_token, refresh_token };
+    await this.userService.update(user._id as string, {
+      refreshToken: hashedRefreshToken,
+    });
+
+    return { ...payload, access_token, refresh_token,permissions};
   }
 
   private generateAccessToken(payload: AuthPayload): string {
-    console.log({payload})
-    const a= this.jwtService.sign(payload, { expiresIn: '15m', secret: config.jwtSecret});
-
-    console.log({a})
-    return a
+    return this.jwtService.sign(payload, { expiresIn: '15m' });
+  
   }
 
-  private generateRefreshToken(payload: AuthPayload): string {
-    return this.jwtService.sign(payload, {
+  private generateRefreshToken(id: string): string {
+    return this.jwtService.sign({sub:id}, {
       secret: config?.jwtRefreshSecret,
       expiresIn: '7d',
     });
   }
   async refreshAccessToken(
-    refreshToken: string,
-  ): Promise<{ accessToken: string }> {
+    body: RefreshTokenDto,
+  ): Promise<any> {
     try {
-      // Verify and decode the refresh token
-      const payload = this.jwtService.verify(refreshToken, {
-        secret: config?.jwtRefreshSecret,
-      });
+
 
       // You can validate user and permissions here if needed
-      const userId = payload.sub;
+      const userId = body.userId;
+      const refreshToken = body.refreshToken;
       const user = await this.userService.findOne(userId);
-      console.log({ user });
       if (!user || !user.refreshToken) {
         throw new Error('Invalid user or refresh token');
       }
 
       const isValid = await bcrypt.compare(refreshToken, user.refreshToken);
 
-      console.log({ isValid });
       if (!isValid) {
         throw new Error('Invalid refresh token');
       }
       // Generate a new access token
-      const newAccessToken = this.generateAccessToken(payload);
-      console.log({ newAccessToken });
-      return { accessToken: newAccessToken };
+      const accessTokenDto:AuthPayload= {
+        name: user?.name,
+        email: user?.email,
+        sub: user?._id, // Typically used to represent the user ID
+      }
+      const newAccessToken = this.generateAccessToken(accessTokenDto);
+      const permissions = await this.userService.userPermissions(
+        user?._id as string,
+      );
+      return { ...accessTokenDto,accessToken: newAccessToken,permissions };
     } catch (error) {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }

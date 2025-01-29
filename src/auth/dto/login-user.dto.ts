@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsEmail } from 'class-validator';
+import { IsString, IsEmail, IsMongoId } from 'class-validator';
 export interface AuthPayload {
   name: string;
   email: string;
   sub: string |unknown; // Typically used to represent the user ID
-  permissions: string[];
+  // permissions: string[];
 }
 
 export class LoginUserDto {
@@ -18,6 +18,9 @@ export class LoginUserDto {
 }
 
 export class RefreshTokenDto {
+  @ApiProperty({ example: 'dhkshfkashfashdfh346126347' ,required:true})
+  @IsMongoId()
+  userId: string;
   @ApiProperty({ example: 'refresh-token-sample' })
   refreshToken: string;
 }
