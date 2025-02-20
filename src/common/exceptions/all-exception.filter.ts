@@ -1,54 +1,37 @@
 import {
-    ExceptionFilter,
-    Catch,
-    ArgumentsHost,
-    HttpException,
-    BadRequestException,
-  } from '@nestjs/common';
-  import { Response } from 'express';
-  
-  @Catch()
-  export class AllExceptionsFilter implements ExceptionFilter {
-    catch(exception: any, host: ArgumentsHost) {
-      const ctx = host.switchToHttp();
-      const response = ctx.getResponse<Response>();
-  
-      let status = 500;
-      let message = 'Internal Server Error';
-      let errorCode = 500;
-      let errors = null;
-  
-      if (exception instanceof HttpException) {
-        const res = exception.getResponse() as any;
-        status = exception.getStatus();
-        message = res.message || exception.message;
-        errorCode = status;
-  
-        // ✅ Handle Validation Errors
-        if (
-          exception instanceof BadRequestException &&
-          Array.isArray(res.message)
-        ) {
-          errors = res.message.map((error) => ({
-            field: error.property,
-            constraints: error.constraints,
-          }));
-        }
-      }
-  
-      console.error('🚨 Exception Caught:', {
-        errorCode,
-        message,
-        errors,
-      });
-  
-      response.status(status).json({
-        success: false,
-        errorCode,
-        message,
-        errors,
-        data: null,
-      });
-    }
-  }
-  
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  Logger,
+  HttpStatus,
+} from '@nestjs/common';
+
+@Catch()
+export class AllExceptionsFilter implements ExceptionFilter {
+  private readonly logger = new Logger(AllExceptionsFilter.name);
+
+  catch(exception: any, host: ArgumentsHost) {
+	const logger = new Logger('Error Logger');
+	const ctx = host.switchToHttp();
+	const request = ctx.getResponse();
+
+	const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+	const message = exception?.response?.message || exception.message;
+	let responseObjArr: unknown[];
+
+	logger.error(exception.message, exception.stack, ctx.getRequest().url);
+
+	if (typeof message === 'object') {
+		responseObjArr = [...message];
+	} else {
+		responseObjArr = [message];
+	}
+
+	request.status(status).send({
+		success: false,
+		message: responseObjArr,
+		data: null,
+	});
+}
+}

@@ -19,7 +19,7 @@ export class User extends Document {
   roles?: mongoose.Schema.Types.ObjectId[];
 
   @Prop({ type: String })
-  refreshToken: { type: String }; // Optional field to store hashed refresh token
+  refreshToken: string; // Optional field to store hashed refresh token
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

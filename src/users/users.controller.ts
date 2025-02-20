@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -16,6 +17,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { PermissionsGuard } from 'src/auth/guards/permission.guard';
 import { Permissions } from 'src/auth/decorators/permission.decorator';
 import { User } from './entities/user.entity';
+import { PaginationFilterDto } from 'src/common/dto/paginate.dto';
 
 @ApiBearerAuth()
 @Controller('users')
@@ -26,13 +28,13 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('user.read') // Only users with the 'admin' role can access this route
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  async findAll(@Query() query:PaginationFilterDto):Promise<any> {
+    return  await this.usersService.findAll(query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  async findOne(@Param('id') id: string):Promise<any> {
+    return await this.usersService.findOne(id);
   }
   @Get('permissions/:id')
   async userPermissions(@Param('id') id: string): Promise<any> {
@@ -40,8 +42,8 @@ export class UsersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return await this.usersService.update(id, updateUserDto);
   }
   @Patch('add-roles/:id')
   async addRoles(

@@ -5,7 +5,7 @@ import { BaseRepository } from 'src/common/repository/base.repository';
 import { Test } from './entities/test.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { PaginationFilterDto } from 'src/common/dto/paginate.dto';
+import { PaginatedResponseDto, PaginationFilterDto } from 'src/common/dto/paginate.dto';
 
 @Injectable()
 export class TestService {
@@ -32,7 +32,7 @@ export class TestService {
     return await this.repo.findOne({ _id: id });
   }
 
-  async findAll(body:PaginationFilterDto):Promise<Test[]> {
+  async findAll(body:PaginationFilterDto): Promise<PaginatedResponseDto<Test>>  {
     return await this.repo.paginate(body);
   }
 }

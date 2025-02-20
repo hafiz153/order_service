@@ -8,11 +8,11 @@ export interface AuthPayload {
 }
 
 export class LoginUserDto {
-  @ApiProperty({ example: 'email', description: 'The email of the user.' })
+  @ApiProperty({ example: 'hafiz@gmail.com', description: 'The email of the user.' })
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: 'password', description: 'The password of the user.' })
+  @ApiProperty({ example: '12345678', description: 'The password of the user.' })
   @IsString()
   password: string;
 }

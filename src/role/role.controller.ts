@@ -3,6 +3,7 @@ import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdatePermissionDto, UpdateRoleDto } from './dto/update-role.dto';
 import { Role } from './entities/role.entity';
+import { PaginatedResponseDto, PaginationFilterDto } from 'src/common/dto/paginate.dto';
 
 @Controller('role')
 export class RoleController {
@@ -14,8 +15,8 @@ export class RoleController {
   }
 
   @Get()
-  async findAll():Promise<Role[]> {
-    return await this.roleService.findAll();
+  async findAll(@Body() body:PaginationFilterDto):Promise<PaginatedResponseDto<Role>> {
+    return await this.roleService.findAll(body);
   }
 
   @Get(':id')

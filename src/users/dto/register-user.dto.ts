@@ -51,5 +51,6 @@ export class RegisterUserDto {
   roles?: mongoose.Schema.Types.ObjectId[];
 
   @IsOptional()
+  @IsString()
   refreshToken?: string;
 }
