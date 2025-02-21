@@ -10,7 +10,7 @@ const rolePermissions = () => {
     },
     {
       name: 'Owner',
-      permissions: ['user.create', 'user.read', 'user.update'],
+      permissions: ['user.create', 'user.read', 'user.update','user.read.single'],
     },
   ];
 };

@@ -12,26 +12,40 @@ export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
 
   catch(exception: any, host: ArgumentsHost) {
-	const logger = new Logger('Error Logger');
-	const ctx = host.switchToHttp();
-	const request = ctx.getResponse();
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse();
+    const request = ctx.getRequest();
 
-	const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-	const message = exception?.response?.message || exception.message;
-	let responseObjArr: unknown[];
+    // Determine status code
+    const status =
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
 
-	logger.error(exception.message, exception.stack, ctx.getRequest().url);
+    // Get message from exception
+    const exceptionResponse = exception.getResponse
+      ? exception.getResponse()
+      : exception.message;
+    const message =
+      typeof exceptionResponse === 'object'
+        ? exceptionResponse?.message
+        : exception.message;
 
-	if (typeof message === 'object') {
-		responseObjArr = [...message];
-	} else {
-		responseObjArr = [message];
-	}
+    // Ensure message is always an array for consistency
+    const responseObjArr = Array.isArray(message) ? message : [message];
 
-	request.status(status).send({
-		success: false,
-		message: responseObjArr,
-		data: null,
-	});
-}
+    // Log error details
+    this.logger.error(
+      `Error in ${request.method} ${request.url}`,
+      exception.stack,
+    );
+
+    // Send response
+    response.status(status).json({
+      success: false,
+      statusCode: status,
+      message: responseObjArr,
+      data: null,
+    });
+  }
 }

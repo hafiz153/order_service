@@ -1,7 +1,7 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
 import { map, Observable } from "rxjs";
-
+import { Response as ExpressResponse } from 'express';
 export class Response<T> {
 	@ApiProperty()
 	success: boolean;
@@ -10,15 +10,18 @@ export class Response<T> {
 
 @Injectable()
 export class GlobalResponseTransformer<T> implements NestInterceptor<T, Response<T>> {
-	intercept(context: ExecutionContext, next: CallHandler): Observable<Response<T>> {
+	intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+		const httpContext = context.switchToHttp();
+		const response = httpContext.getResponse<ExpressResponse>();
 		return next.handle().pipe(
-			map((data) => ({
-				success: true,
-				data: this.transformData(data),
-				message: null,
-			}))
+		  map((data) => ({
+			success: true,
+			statusCode: response.statusCode, // Dynamically fetch the HTTP status code
+			data: this.transformData(data),
+			message: null,
+		  })),
 		);
-	}
+	  }
 
 	private transformData(data: any): any {
 		if (Array.isArray(data)) {

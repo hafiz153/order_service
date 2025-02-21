@@ -15,8 +15,7 @@ export class TestService {
     this.repo = new BaseRepository<Test>(testModel);
   }
 
-  async create(data: CreateTestDto):Promise<any> {
-    // return await this.testModel.create(data)
+  async create(data: CreateTestDto):Promise<Test|null> {
     return await this.repo.create(data);
   }
 
@@ -32,7 +31,7 @@ export class TestService {
     return await this.repo.findOne({ _id: id });
   }
 
-  async findAll(body:PaginationFilterDto): Promise<PaginatedResponseDto<Test>>  {
-    return await this.repo.paginate(body);
+  async findAll(query:PaginationFilterDto): Promise<PaginatedResponseDto<Test>>  {
+    return await this.repo.paginate(query);
   }
 }
