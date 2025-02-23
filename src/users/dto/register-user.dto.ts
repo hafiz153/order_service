@@ -26,13 +26,6 @@ export class RegisterUserDto {
   email: string;
 
   @ApiProperty({
-    example: generateRegisterUser().password,
-    description: 'The password of the user.',
-  })
-  @IsString()
-  password: string;
-
-  @ApiProperty({
     example: generateRegisterUser().age,
     description: 'The age of the user.',
     required: false,
@@ -40,6 +33,22 @@ export class RegisterUserDto {
   @IsOptional()
   @IsNumber()
   age?: number;
+
+  @ApiProperty({
+    example: generateRegisterUser().image,
+    description: 'The age of the user.',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  image?: string;
+
+  @ApiProperty({
+    example: generateRegisterUser().password,
+    description: 'The password of the user.',
+  })
+  @IsString()
+  password: string;
 
   @ApiProperty({
     example: ['679332e8b830f37826799270'],

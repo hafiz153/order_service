@@ -46,7 +46,7 @@ export class UsersService {
     return user;
   }
   async isUserExistsByEmail(email: string): Promise<User | null> {
-    return await this.repo.findOne({ email });
+    return await this.repo.isExists({ email });
   }
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.repo.findOneAndUpdate({_id:id}, updateUserDto );
