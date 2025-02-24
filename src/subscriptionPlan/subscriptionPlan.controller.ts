@@ -13,11 +13,15 @@ import { SubscriptionPlanService } from './subscriptionPlan.service';
 import { CreateSubscriptionPlanDto } from './dto/create-subscriptionPlan.dto';
 import { UpdateSubscriptionPlanDto } from './dto/update-subscriptionPlan.dto';
 import { PaginationFilterDto } from 'src/common/dto/paginate.dto';
+import { MicroserviceClient } from 'src/common/redis/microserviceClientModule';
+import { RedisMessageEnum } from 'src/common/redis/message';
 
 @ApiTags('SubscriptionPlans') // Group APIs under "SubscriptionPlans"
 @Controller('subscriptionPlan')
 export class SubscriptionPlanController {
-  constructor(private readonly subscriptionPlanService: SubscriptionPlanService) {}
+  constructor(private readonly subscriptionPlanService: SubscriptionPlanService,
+    private readonly redis:MicroserviceClient
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new subscriptionPlan record' })
@@ -66,5 +70,10 @@ export class SubscriptionPlanController {
   @ApiResponse({ status: 404, description: 'SubscriptionPlan record not found.' })
   remove(@Param('id') id: string) {
     return this.subscriptionPlanService.remove(id);
+  }
+  
+  @Get('message/test')
+  async test(): Promise<any>{
+    return await this.redis.send(RedisMessageEnum.TEST, {name:"hafiz"})
   }
 }
